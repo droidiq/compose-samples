@@ -22,11 +22,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.preferredHeight
-import androidx.compose.foundation.layout.preferredHeightIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -56,7 +57,7 @@ fun SearchCategories(
             SearchCategoryCollection(collection, index)
         }
     }
-    Spacer(Modifier.preferredHeight(8.dp))
+    Spacer(Modifier.height(8.dp))
 }
 
 @Composable
@@ -71,7 +72,7 @@ private fun SearchCategoryCollection(
             style = MaterialTheme.typography.h6,
             color = JetsnackTheme.colors.textPrimary,
             modifier = Modifier
-                .preferredHeightIn(min = 56.dp)
+                .heightIn(min = 56.dp)
                 .padding(horizontal = 24.dp, vertical = 4.dp)
                 .wrapContentHeight()
         )
@@ -88,7 +89,7 @@ private fun SearchCategoryCollection(
                 )
             }
         }
-        Spacer(Modifier.preferredHeight(4.dp))
+        Spacer(Modifier.height(4.dp))
     }
 }
 
@@ -120,6 +121,7 @@ private fun SearchCategory(
             )
             SnackImage(
                 imageUrl = category.imageUrl,
+                contentDescription = null,
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -130,7 +132,7 @@ private fun SearchCategory(
 
         // Image is sized to the larger of height of item, or a minimum value
         // i.e. may appear larger than item (but clipped to the item bounds)
-        val imageSize = max(MinImageSize.toIntPx(), constraints.maxHeight)
+        val imageSize = max(MinImageSize.roundToPx(), constraints.maxHeight)
         val imagePlaceable = measurables[1].measure(Constraints.fixed(imageSize, imageSize))
         layout(
             width = constraints.maxWidth,

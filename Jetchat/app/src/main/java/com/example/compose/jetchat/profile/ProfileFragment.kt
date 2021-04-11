@@ -21,7 +21,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.runtime.Providers
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
@@ -30,8 +30,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import com.example.compose.jetchat.MainViewModel
 import com.example.compose.jetchat.theme.JetchatTheme
-import dev.chrisbanes.accompanist.insets.AmbientWindowInsets
-import dev.chrisbanes.accompanist.insets.ViewWindowInsetObserver
+import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.ViewWindowInsetObserver
 
 class ProfileFragment : Fragment() {
 
@@ -63,7 +63,7 @@ class ProfileFragment : Fragment() {
         setContent {
             val userData by viewModel.userData.observeAsState()
 
-            Providers(AmbientWindowInsets provides windowInsets) {
+            CompositionLocalProvider(LocalWindowInsets provides windowInsets) {
                 JetchatTheme {
                     if (userData == null) {
                         ProfileError()

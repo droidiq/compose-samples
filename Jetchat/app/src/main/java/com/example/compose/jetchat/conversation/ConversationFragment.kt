@@ -22,7 +22,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import androidx.compose.runtime.Providers
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -32,9 +33,10 @@ import com.example.compose.jetchat.MainViewModel
 import com.example.compose.jetchat.R
 import com.example.compose.jetchat.data.exampleUiState
 import com.example.compose.jetchat.theme.JetchatTheme
-import dev.chrisbanes.accompanist.insets.AmbientWindowInsets
-import dev.chrisbanes.accompanist.insets.ExperimentalAnimatedInsets
-import dev.chrisbanes.accompanist.insets.ViewWindowInsetObserver
+import com.google.accompanist.insets.ExperimentalAnimatedInsets
+import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.ViewWindowInsetObserver
+import com.google.accompanist.insets.navigationBarsPadding
 
 class ConversationFragment : Fragment() {
 
@@ -58,9 +60,9 @@ class ConversationFragment : Fragment() {
             .start(windowInsetsAnimationsEnabled = true)
 
         setContent {
-            Providers(
-                AmbientBackPressedDispatcher provides requireActivity().onBackPressedDispatcher,
-                AmbientWindowInsets provides windowInsets,
+            CompositionLocalProvider(
+                LocalBackPressedDispatcher provides requireActivity().onBackPressedDispatcher,
+                LocalWindowInsets provides windowInsets,
             ) {
                 JetchatTheme {
                     ConversationContent(
@@ -75,7 +77,10 @@ class ConversationFragment : Fragment() {
                         },
                         onNavIconPressed = {
                             activityViewModel.openDrawer()
-                        }
+                        },
+                        // Add padding so that we are inset from any left/right navigation bars
+                        // (usually shown when in landscape orientation)
+                        modifier = Modifier.navigationBarsPadding(bottom = false)
                     )
                 }
             }

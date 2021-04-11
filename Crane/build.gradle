@@ -31,7 +31,7 @@ buildscript {
 }
 
 plugins {
-    id 'com.diffplug.spotless' version '5.8.2'
+    id 'com.diffplug.spotless' version '5.11.1'
 }
 
 subprojects {
@@ -66,11 +66,12 @@ subprojects {
 
             // Use experimental APIs
             freeCompilerArgs += '-Xopt-in=kotlin.RequiresOptIn'
-            freeCompilerArgs += '-Xallow-jvm-ir-dependencies'
-            freeCompilerArgs += [
-                    '-P',
-                    'plugin:androidx.compose.compiler.plugins.kotlin:intrinsicRemember=true'
-            ]
+        }
+    }
+    // androidx.test and hilt are forcing JUnit, 4.12. This forces them to use 4.13
+    configurations.configureEach {
+        resolutionStrategy {
+            force Libs.JUnit.junit
         }
     }
 }

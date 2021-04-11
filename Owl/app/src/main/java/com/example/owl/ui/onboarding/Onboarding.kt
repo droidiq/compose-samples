@@ -16,10 +16,9 @@
 
 package com.example.owl.ui.onboarding
 
-import androidx.compose.animation.DpPropKey
-import androidx.compose.animation.core.FloatPropKey
-import androidx.compose.animation.core.transitionDefinition
-import androidx.compose.animation.transition
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -29,18 +28,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.preferredHeight
-import androidx.compose.foundation.layout.preferredSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.material.AmbientContentAlpha
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
@@ -51,19 +51,20 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.Explore
 import androidx.compose.material.primarySurface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.owl.R
 import com.example.owl.model.Topic
@@ -72,8 +73,8 @@ import com.example.owl.ui.theme.OwlTheme
 import com.example.owl.ui.theme.YellowTheme
 import com.example.owl.ui.theme.pink500
 import com.example.owl.ui.utils.NetworkImage
-import dev.chrisbanes.accompanist.insets.navigationBarsPadding
-import dev.chrisbanes.accompanist.insets.statusBarsPadding
+import com.google.accompanist.insets.navigationBarsPadding
+import com.google.accompanist.insets.statusBarsPadding
 import kotlin.math.max
 
 @Composable
@@ -83,16 +84,15 @@ fun Onboarding(onboardingComplete: () -> Unit) {
             topBar = { AppBar() },
             backgroundColor = MaterialTheme.colors.primarySurface,
             floatingActionButton = {
-                val fabLabel = stringResource(id = R.string.continue_to_courses)
                 FloatingActionButton(
                     onClick = onboardingComplete,
                     modifier = Modifier
                         .navigationBarsPadding()
-                        .semantics {
-                            contentDescription = fabLabel
-                        }
                 ) {
-                    Icon(Icons.Rounded.Explore)
+                    Icon(
+                        imageVector = Icons.Rounded.Explore,
+                        contentDescription = stringResource(R.string.label_continue_to_courses)
+                    )
                 }
             }
         ) { innerPadding ->
@@ -116,7 +116,7 @@ fun Onboarding(onboardingComplete: () -> Unit) {
                         .weight(1f)
                         .wrapContentHeight()
                 )
-                Spacer(Modifier.preferredHeight(56.dp)) // center grid accounting for FAB
+                Spacer(Modifier.height(56.dp)) // center grid accounting for FAB
             }
         }
     }
@@ -132,14 +132,18 @@ private fun AppBar() {
             .statusBarsPadding()
     ) {
         Image(
-            imageVector = vectorResource(id = OwlTheme.images.lockupLogo),
+            painter = painterResource(id = OwlTheme.images.lockupLogo),
+            contentDescription = null,
             modifier = Modifier.padding(16.dp)
         )
         IconButton(
             modifier = Modifier.padding(16.dp),
             onClick = { /* todo */ }
         ) {
-            Icon(Icons.Filled.Settings)
+            Icon(
+                imageVector = Icons.Filled.Settings,
+                contentDescription = stringResource(R.string.label_settings)
+            )
         }
     }
 }
@@ -159,53 +163,84 @@ private fun TopicsGrid(modifier: Modifier = Modifier) {
 
 private enum class SelectionState { Unselected, Selected }
 
-private val CornerRadius = DpPropKey("Corner Radius")
-private val SelectedAlpha = FloatPropKey("Selected Alpha")
-private val CheckScale = FloatPropKey("Check Scale")
+/**
+ * Class holding animating values when transitioning topic chip states.
+ */
+private class TopicChipTransition(
+    cornerRadius: State<Dp>,
+    selectedAlpha: State<Float>,
+    checkScale: State<Float>
+) {
+    val cornerRadius by cornerRadius
+    val selectedAlpha by selectedAlpha
+    val checkScale by checkScale
+}
 
-private val TopicSelect = transitionDefinition<SelectionState> {
-    state(SelectionState.Selected) {
-        this[CornerRadius] = 28.dp
-        this[SelectedAlpha] = 0.8f
-        this[CheckScale] = 1f
+@Composable
+private fun topicChipTransition(topicSelected: Boolean): TopicChipTransition {
+    val transition = updateTransition(
+        targetState = if (topicSelected) SelectionState.Selected else SelectionState.Unselected
+    )
+    val corerRadius = transition.animateDp { state ->
+        when (state) {
+            SelectionState.Unselected -> 0.dp
+            SelectionState.Selected -> 28.dp
+        }
     }
-    state(SelectionState.Unselected) {
-        this[CornerRadius] = 0.dp
-        this[SelectedAlpha] = 0f
-        this[CheckScale] = 0.6f
+    val selectedAlpha = transition.animateFloat { state ->
+        when (state) {
+            SelectionState.Unselected -> 0f
+            SelectionState.Selected -> 0.8f
+        }
+    }
+    val checkScale = transition.animateFloat { state ->
+        when (state) {
+            SelectionState.Unselected -> 0.6f
+            SelectionState.Selected -> 1f
+        }
+    }
+    return remember(transition) {
+        TopicChipTransition(corerRadius, selectedAlpha, checkScale)
     }
 }
 
 @Composable
 private fun TopicChip(topic: Topic) {
     val (selected, onSelected) = remember { mutableStateOf(false) }
-    val selectionState = transition(
-        definition = TopicSelect,
-        toState = if (selected) SelectionState.Selected else SelectionState.Unselected
-    )
+    val topicChipTransitionState = topicChipTransition(selected)
+
     Surface(
         modifier = Modifier.padding(4.dp),
         elevation = OwlTheme.elevations.card,
-        shape = MaterialTheme.shapes.medium.copy(topLeft = CornerSize(selectionState[CornerRadius]))
+        shape = MaterialTheme.shapes.medium.copy(
+            topStart = CornerSize(
+                topicChipTransitionState.cornerRadius
+            )
+        )
     ) {
         Row(modifier = Modifier.toggleable(value = selected, onValueChange = onSelected)) {
             Box {
                 NetworkImage(
                     url = topic.imageUrl,
+                    contentDescription = null,
                     modifier = Modifier
-                        .preferredSize(width = 72.dp, height = 72.dp)
+                        .size(width = 72.dp, height = 72.dp)
                         .aspectRatio(1f)
                 )
-                val selectedAlpha = selectionState[SelectedAlpha]
-                if (selectedAlpha > 0f) {
+                if (topicChipTransitionState.selectedAlpha > 0f) {
                     Surface(
-                        color = pink500.copy(alpha = selectedAlpha),
+                        color = pink500.copy(alpha = topicChipTransitionState.selectedAlpha),
                         modifier = Modifier.matchParentSize()
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Done,
-                            tint = MaterialTheme.colors.onPrimary.copy(alpha = selectedAlpha),
-                            modifier = Modifier.scale(selectionState[CheckScale])
+                            contentDescription = null,
+                            tint = MaterialTheme.colors.onPrimary.copy(
+                                alpha = topicChipTransitionState.selectedAlpha
+                            ),
+                            modifier = Modifier
+                                .wrapContentSize()
+                                .scale(topicChipTransitionState.checkScale)
                         )
                     }
                 }
@@ -222,12 +257,13 @@ private fun TopicChip(topic: Topic) {
                     )
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Providers(AmbientContentAlpha provides ContentAlpha.medium) {
+                    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
                         Icon(
-                            imageVector = vectorResource(R.drawable.ic_grain),
+                            painter = painterResource(R.drawable.ic_grain),
+                            contentDescription = null,
                             modifier = Modifier
                                 .padding(start = 16.dp)
-                                .preferredSize(12.dp)
+                                .size(12.dp)
                         )
                         Text(
                             text = topic.courses.toString(),

@@ -19,21 +19,19 @@ package com.example.jetsnack.ui.home.cart
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ChainStyle
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ConstraintLayout
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.preferredHeight
-import androidx.compose.foundation.layout.preferredHeightIn
-import androidx.compose.foundation.layout.preferredSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -48,12 +46,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.LastBaseline
-import androidx.compose.ui.platform.AmbientContext
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.viewModel
+import androidx.constraintlayout.compose.ChainStyle
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.jetsnack.R
 import com.example.jetsnack.model.OrderLine
 import com.example.jetsnack.model.SnackCollection
@@ -68,7 +68,7 @@ import com.example.jetsnack.ui.home.DestinationBar
 import com.example.jetsnack.ui.theme.AlphaNearOpaque
 import com.example.jetsnack.ui.theme.JetsnackTheme
 import com.example.jetsnack.ui.utils.formatPrice
-import dev.chrisbanes.accompanist.insets.statusBarsHeight
+import com.google.accompanist.insets.statusBarsHeight
 
 @Composable
 fun Cart(
@@ -126,7 +126,7 @@ private fun CartContent(
     onSnackClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val resources = AmbientContext.current.resources
+    val resources = LocalContext.current.resources
     val snackCountFormattedString = remember(orderLines.size, resources) {
         resources.getQuantityString(
             R.plurals.cart_order_count,
@@ -143,7 +143,7 @@ private fun CartContent(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .preferredHeightIn(min = 56.dp)
+                    .heightIn(min = 56.dp)
                     .padding(horizontal = 24.dp, vertical = 4.dp)
                     .wrapContentHeight()
             )
@@ -194,8 +194,9 @@ fun CartItem(
         createVerticalChain(name, tag, priceSpacer, price, chainStyle = ChainStyle.Packed)
         SnackImage(
             imageUrl = snack.imageUrl,
+            contentDescription = null,
             modifier = Modifier
-                .preferredSize(100.dp)
+                .size(100.dp)
                 .constrainAs(image) {
                     top.linkTo(parent.top, margin = 16.dp)
                     bottom.linkTo(parent.bottom, margin = 16.dp)
@@ -227,7 +228,8 @@ fun CartItem(
         ) {
             Icon(
                 imageVector = Icons.Filled.Close,
-                tint = JetsnackTheme.colors.iconSecondary
+                tint = JetsnackTheme.colors.iconSecondary,
+                contentDescription = stringResource(R.string.label_remove)
             )
         }
         Text(
@@ -246,7 +248,7 @@ fun CartItem(
         )
         Spacer(
             Modifier
-                .preferredHeight(8.dp)
+                .height(8.dp)
                 .constrainAs(priceSpacer) {
                     linkTo(top = tag.bottom, bottom = price.top)
                 }
@@ -298,14 +300,15 @@ fun SummaryItem(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .padding(horizontal = 24.dp)
-                .preferredHeightIn(min = 56.dp)
+                .heightIn(min = 56.dp)
                 .wrapContentHeight()
         )
         Row(modifier = Modifier.padding(horizontal = 24.dp)) {
             Text(
                 text = stringResource(R.string.cart_subtotal_label),
                 style = MaterialTheme.typography.body1,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
                     .wrapContentWidth(Alignment.Start)
                     .alignBy(LastBaseline)
             )
@@ -319,7 +322,8 @@ fun SummaryItem(
             Text(
                 text = stringResource(R.string.cart_shipping_label),
                 style = MaterialTheme.typography.body1,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
                     .wrapContentWidth(Alignment.Start)
                     .alignBy(LastBaseline)
             )
@@ -329,7 +333,7 @@ fun SummaryItem(
                 modifier = Modifier.alignBy(LastBaseline)
             )
         }
-        Spacer(modifier = Modifier.preferredHeight(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         JetsnackDivider()
         Row(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) {
             Text(

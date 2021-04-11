@@ -22,10 +22,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.preferredHeight
-import androidx.compose.foundation.layout.preferredSize
-import androidx.compose.foundation.layout.preferredWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.BasicTextField
@@ -62,7 +62,7 @@ import com.example.jetsnack.model.SnackRepo
 import com.example.jetsnack.ui.components.JetsnackDivider
 import com.example.jetsnack.ui.components.JetsnackSurface
 import com.example.jetsnack.ui.theme.JetsnackTheme
-import dev.chrisbanes.accompanist.insets.statusBarsPadding
+import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
 fun Search(
@@ -174,7 +174,7 @@ private fun SearchBar(
         shape = MaterialTheme.shapes.small,
         modifier = modifier
             .fillMaxWidth()
-            .preferredHeight(56.dp)
+            .height(56.dp)
             .padding(horizontal = 24.dp, vertical = 8.dp)
     ) {
         Box(Modifier.fillMaxSize()) {
@@ -191,7 +191,8 @@ private fun SearchBar(
                     IconButton(onClick = onClearQuery) {
                         Icon(
                             imageVector = Icons.Outlined.ArrowBack,
-                            tint = JetsnackTheme.colors.iconPrimary
+                            tint = JetsnackTheme.colors.iconPrimary,
+                            contentDescription = stringResource(R.string.label_back)
                         )
                     }
                 }
@@ -209,10 +210,10 @@ private fun SearchBar(
                         color = JetsnackTheme.colors.iconPrimary,
                         modifier = Modifier
                             .padding(horizontal = 6.dp)
-                            .preferredSize(36.dp)
+                            .size(36.dp)
                     )
                 } else {
-                    Spacer(Modifier.preferredWidth(IconSize)) // balance arrow icon
+                    Spacer(Modifier.width(IconSize)) // balance arrow icon
                 }
             }
         }
@@ -225,13 +226,16 @@ private val IconSize = 48.dp
 private fun SearchHint() {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxSize().wrapContentSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .wrapContentSize()
     ) {
         Icon(
             imageVector = Icons.Outlined.Search,
-            tint = JetsnackTheme.colors.textHelp
+            tint = JetsnackTheme.colors.textHelp,
+            contentDescription = stringResource(R.string.label_search)
         )
-        Spacer(Modifier.preferredWidth(8.dp))
+        Spacer(Modifier.width(8.dp))
         Text(
             text = stringResource(R.string.search_jetsnack),
             color = JetsnackTheme.colors.textHelp

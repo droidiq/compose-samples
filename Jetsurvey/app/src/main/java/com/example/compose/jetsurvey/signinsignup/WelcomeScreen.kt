@@ -16,23 +16,23 @@
 
 package com.example.compose.jetsurvey.signinsignup
 
-import androidx.compose.animation.core.animateAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.preferredHeight
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material.AmbientContentAlpha
 import androidx.compose.material.Button
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,9 +42,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.AmbientDensity
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -67,10 +67,10 @@ fun WelcomeScreen(onEvent: (WelcomeEvent) -> Unit) {
     val currentOffsetHolder = remember { mutableStateOf(0f) }
     currentOffsetHolder.value = if (showBranding) 0f else -brandingBottom
     val currentOffsetHolderDp =
-        with(AmbientDensity.current) { currentOffsetHolder.value.toDp() }
-    val heightDp = with(AmbientDensity.current) { heightWithBranding.toDp() }
+        with(LocalDensity.current) { currentOffsetHolder.value.toDp() }
+    val heightDp = with(LocalDensity.current) { heightWithBranding.toDp() }
     Surface(modifier = Modifier.fillMaxSize()) {
-        val offset by animateAsState(targetValue = currentOffsetHolderDp)
+        val offset by animateDpAsState(targetValue = currentOffsetHolderDp)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -88,7 +88,7 @@ fun WelcomeScreen(onEvent: (WelcomeEvent) -> Unit) {
                     .weight(1f)
                     .onGloballyPositioned {
                         if (brandingBottom == 0f) {
-                            brandingBottom = it.boundsInParent.bottom
+                            brandingBottom = it.boundsInParent().bottom
                         }
                     }
             )
@@ -110,7 +110,7 @@ private fun Modifier.brandingPreferredHeight(
     return if (!showBranding) {
         this
             .wrapContentHeight(unbounded = true)
-            .preferredHeight(heightDp)
+            .height(heightDp)
     } else {
         this
     }
@@ -148,8 +148,9 @@ private fun Logo(
         R.drawable.ic_logo_dark
     }
     Image(
-        imageVector = vectorResource(id = assetId),
-        modifier = modifier
+        painter = painterResource(id = assetId),
+        modifier = modifier,
+        contentDescription = null
     )
 }
 
@@ -161,7 +162,7 @@ private fun SignInCreateAccount(
 ) {
     val emailState = remember { EmailState() }
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Providers(AmbientContentAlpha provides ContentAlpha.medium) {
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Text(
                 text = stringResource(id = R.string.sign_in_create_account),
                 style = MaterialTheme.typography.subtitle2,

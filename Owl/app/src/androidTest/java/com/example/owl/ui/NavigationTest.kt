@@ -17,19 +17,18 @@
 package com.example.owl.ui
 
 import androidx.activity.ComponentActivity
-import androidx.compose.runtime.Providers
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.hasContentDescription
-import androidx.compose.ui.test.hasSubstring
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithSubstring
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.test.platform.app.InstrumentationRegistry
 import com.example.owl.R
 import com.example.owl.model.courses
 import com.example.owl.ui.fakes.ProvideTestImageLoader
-import com.example.owl.ui.utils.AmbientBackDispatcher
-import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
+import com.example.owl.ui.utils.LocalBackDispatcher
+import com.google.accompanist.insets.ProvideWindowInsets
 import org.junit.Rule
 import org.junit.Test
 
@@ -45,20 +44,17 @@ class NavigationTest {
      */
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
-    lateinit var activity: ComponentActivity
 
     private fun startActivity(startDestination: String? = null) {
-        composeTestRule.activityRule.scenario.onActivity {
-            activity = it
-            composeTestRule.setContent {
-                Providers(AmbientBackDispatcher provides activity.onBackPressedDispatcher) {
-                    ProvideWindowInsets {
-                        ProvideTestImageLoader {
-                            if (startDestination == null) {
-                                NavGraph()
-                            } else {
-                                NavGraph(startDestination)
-                            }
+        composeTestRule.setContent {
+            val backDispatcher = composeTestRule.activity.onBackPressedDispatcher
+            CompositionLocalProvider(LocalBackDispatcher provides backDispatcher) {
+                ProvideWindowInsets {
+                    ProvideTestImageLoader {
+                        if (startDestination == null) {
+                            NavGraph()
+                        } else {
+                            NavGraph(startDestination)
                         }
                     }
                 }
@@ -72,7 +68,10 @@ class NavigationTest {
         startActivity()
         // The first screen should be the onboarding screen.
         // Assert that the FAB label for the onboarding screen exists:
-        composeTestRule.onNodeWithContentDescription(getOnboardingFabLabel()).assertExists()
+        composeTestRule.onNodeWithContentDescription(
+            label = getOnboardingFabLabel(),
+            useUnmergedTree = true // https://issuetracker.google.com/issues/184825850
+        ).assertExists()
     }
 
     @Test
@@ -82,10 +81,16 @@ class NavigationTest {
 
         // Navigate to the next screen by clicking on the FAB
         val fabLabel = getOnboardingFabLabel()
-        composeTestRule.onNodeWithContentDescription(fabLabel).performClick()
+        composeTestRule.onNodeWithContentDescription(
+            label = fabLabel,
+            useUnmergedTree = true // https://issuetracker.google.com/issues/184825850
+        ).performClick()
 
         // The first course should be shown
-        composeTestRule.onNodeWithSubstring(courses.first().name).assertExists()
+        composeTestRule.onNodeWithText(
+            text = courses.first().name,
+            substring = true
+        ).assertExists()
     }
 
     @Test
@@ -95,36 +100,44 @@ class NavigationTest {
 
         // Navigate to the first course
         composeTestRule.onNode(
-            hasContentDescription(getFeaturedCourseLabel()).and(hasSubstring(courses.first().name))
+            hasContentDescription(getFeaturedCourseLabel()).and(
+                hasText(
+                    text = courses.first().name,
+                    substring = true
+                )
+            )
         ).performClick()
 
         // Assert navigated to the course details
-        composeTestRule.onNodeWithSubstring(getCourseDesc().take(15)).assertExists()
+        composeTestRule.onNodeWithText(
+            text = getCourseDesc().take(15),
+            substring = true
+        ).assertExists()
     }
 
     @Test
     fun coursesToDetailAndBack() {
         coursesToDetail()
         composeTestRule.runOnUiThread {
-            activity.onBackPressed()
+            composeTestRule.activity.onBackPressed()
         }
 
         // The first course should be shown
-        composeTestRule.onNodeWithSubstring(courses.first().name).assertExists()
+        composeTestRule.onNodeWithText(
+            text = courses.first().name,
+            substring = true
+        ).assertExists()
     }
 
     private fun getOnboardingFabLabel(): String {
-        return InstrumentationRegistry.getInstrumentation().targetContext.resources
-            .getString(R.string.continue_to_courses)
+        return composeTestRule.activity.resources.getString(R.string.label_continue_to_courses)
     }
 
     private fun getFeaturedCourseLabel(): String {
-        return InstrumentationRegistry.getInstrumentation().targetContext.resources
-            .getString(R.string.featured)
+        return composeTestRule.activity.resources.getString(R.string.featured)
     }
 
     private fun getCourseDesc(): String {
-        return InstrumentationRegistry.getInstrumentation().targetContext.resources
-            .getString(R.string.course_desc)
+        return composeTestRule.activity.resources.getString(R.string.course_desc)
     }
 }

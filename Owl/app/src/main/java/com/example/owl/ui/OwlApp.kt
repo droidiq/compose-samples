@@ -18,15 +18,15 @@ package com.example.owl.ui
 
 import androidx.activity.OnBackPressedDispatcher
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
-import com.example.owl.ui.utils.AmbientBackDispatcher
+import androidx.compose.runtime.CompositionLocalProvider
+import com.example.owl.ui.utils.LocalBackDispatcher
 import com.example.owl.ui.utils.ProvideImageLoader
-import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
+import com.google.accompanist.insets.ProvideWindowInsets
 
 @Composable
 fun OwlApp(backDispatcher: OnBackPressedDispatcher) {
 
-    Providers(AmbientBackDispatcher provides backDispatcher) {
+    CompositionLocalProvider(LocalBackDispatcher provides backDispatcher) {
         ProvideWindowInsets {
             ProvideImageLoader {
                 NavGraph()

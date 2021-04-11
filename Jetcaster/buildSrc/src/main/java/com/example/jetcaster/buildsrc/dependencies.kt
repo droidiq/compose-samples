@@ -17,25 +17,24 @@
 package com.example.jetcaster.buildsrc
 
 object Versions {
-    const val ktlint = "0.39.0"
+    const val ktlint = "0.40.0"
 }
 
 object Libs {
-    const val androidGradlePlugin = "com.android.tools.build:gradle:7.0.0-alpha04"
+    const val androidGradlePlugin = "com.android.tools.build:gradle:7.0.0-alpha14"
     const val jdkDesugar = "com.android.tools:desugar_jdk_libs:1.0.9"
 
-    const val junit = "junit:junit:4.13"
-
-    const val material = "com.google.android.material:material:1.1.0"
+    const val material = "com.google.android.material:material:1.3.0"
 
     object Accompanist {
-        private const val version = "0.4.2"
-        const val coil = "dev.chrisbanes.accompanist:accompanist-coil:$version"
-        const val insets = "dev.chrisbanes.accompanist:accompanist-insets:$version"
+        private const val version = "0.7.1"
+        const val coil = "com.google.accompanist:accompanist-coil:$version"
+        const val insets = "com.google.accompanist:accompanist-insets:$version"
+        const val pager = "com.google.accompanist:accompanist-pager:$version"
     }
 
     object Kotlin {
-        private const val version = "1.4.21"
+        private const val version = "1.4.32"
         const val stdlib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version"
         const val gradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$version"
         const val extensions = "org.jetbrains.kotlin:kotlin-android-extensions:$version"
@@ -49,20 +48,33 @@ object Libs {
     }
 
     object OkHttp {
-        private const val version = "4.9.0"
+        private const val version = "4.9.1"
         const val okhttp = "com.squareup.okhttp3:okhttp:$version"
         const val logging = "com.squareup.okhttp3:logging-interceptor:$version"
+    }
+
+    object JUnit {
+        private const val version = "4.13"
+        const val junit = "junit:junit:$version"
     }
 
     object AndroidX {
         const val appcompat = "androidx.appcompat:appcompat:1.2.0"
         const val palette = "androidx.palette:palette:1.0.0"
 
-        const val coreKtx = "androidx.core:core-ktx:1.5.0-beta01"
+        const val coreKtx = "androidx.core:core-ktx:1.6.0-alpha01"
+
+        object Activity {
+            const val activityCompose = "androidx.activity:activity-compose:1.3.0-alpha06"
+        }
+
+        object Constraint {
+            const val constraintLayoutCompose = "androidx.constraintlayout:constraintlayout-compose:1.0.0-alpha05"
+        }
 
         object Compose {
             private const val snapshot = ""
-            private const val version = "1.0.0-alpha10"
+            private const val version = "1.0.0-beta04"
 
             @get:JvmStatic
             val snapshotUrl: String
@@ -79,13 +91,19 @@ object Libs {
             const val tooling = "androidx.compose.ui:ui-tooling:${version}"
         }
 
+        object Lifecycle {
+            private const val version = "2.3.1"
+            const val viewModelCompose = "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha04"
+            const val viewmodel = "androidx.lifecycle:lifecycle-viewmodel-ktx:$version"
+        }
+
         object Test {
-            private const val version = "1.2.0"
+            private const val version = "1.3.0"
             const val core = "androidx.test:core:$version"
             const val rules = "androidx.test:rules:$version"
 
             object Ext {
-                private const val version = "1.1.2-rc01"
+                private const val version = "1.1.2"
                 const val junit = "androidx.test.ext:junit-ktx:$version"
             }
 
@@ -93,17 +111,10 @@ object Libs {
         }
 
         object Room {
-            private const val version = "2.2.5"
+            private const val version = "2.2.6"
             const val runtime = "androidx.room:room-runtime:${version}"
             const val ktx = "androidx.room:room-ktx:${version}"
             const val compiler = "androidx.room:room-compiler:${version}"
-        }
-
-        object Lifecycle {
-            private const val version = "2.2.0"
-            const val extensions = "androidx.lifecycle:lifecycle-extensions:$version"
-            const val livedata = "androidx.lifecycle:lifecycle-livedata-ktx:$version"
-            const val viewmodel = "androidx.lifecycle:lifecycle-viewmodel-ktx:$version"
         }
     }
 

@@ -20,32 +20,34 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.preferredHeight
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.savedinstancestate.savedInstanceState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.samples.crane.base.CraneScaffold
 import androidx.compose.samples.crane.base.Result
 import androidx.compose.samples.crane.data.ExploreModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
@@ -76,7 +78,7 @@ data class DetailsActivityArg(
 class DetailsActivity : ComponentActivity() {
 
     @Inject
-    lateinit var viewModelFactory: DetailsViewModel.AssistedFactory
+    lateinit var viewModelFactory: DetailsViewModelFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,10 +103,12 @@ class DetailsActivity : ComponentActivity() {
 @Composable
 fun DetailsScreen(
     args: DetailsActivityArg,
-    viewModelFactory: DetailsViewModel.AssistedFactory,
+    viewModelFactory: DetailsViewModelFactory,
     onErrorLoading: () -> Unit
 ) {
-    val viewModel: DetailsViewModel = viewModelFactory.create(args.cityName)
+    val viewModel: DetailsViewModel = viewModel(
+        factory = DetailsViewModel.provideFactory(viewModelFactory, args.cityName)
+    )
 
     val cityDetailsResult = remember(viewModel) { viewModel.cityDetails }
     if (cityDetailsResult is Result.Success<ExploreModel>) {
@@ -117,7 +121,7 @@ fun DetailsScreen(
 @Composable
 fun DetailsContent(exploreModel: ExploreModel) {
     Column(verticalArrangement = Arrangement.Center) {
-        Spacer(Modifier.preferredHeight(32.dp))
+        Spacer(Modifier.height(32.dp))
         Text(
             modifier = Modifier.align(Alignment.CenterHorizontally),
             text = exploreModel.city.nameToDisplay,
@@ -128,7 +132,7 @@ fun DetailsContent(exploreModel: ExploreModel) {
             text = exploreModel.description,
             style = MaterialTheme.typography.h6
         )
-        Spacer(Modifier.preferredHeight(16.dp))
+        Spacer(Modifier.height(16.dp))
         CityMapView(exploreModel.city.latitude, exploreModel.city.longitude)
     }
 }
@@ -149,7 +153,7 @@ private fun MapViewContainer(
     latitude: String,
     longitude: String
 ) {
-    var zoom by savedInstanceState { InitialZoom }
+    var zoom by rememberSaveable { mutableStateOf(InitialZoom) }
     val coroutineScope = rememberCoroutineScope()
 
     ZoomControls(zoom) {

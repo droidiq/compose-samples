@@ -20,9 +20,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material.AmbientContentColor
+import androidx.compose.material.LocalContentColor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -60,7 +60,7 @@ fun JetsnackSurface(
             )
             .clip(shape)
     ) {
-        Providers(AmbientContentColor provides contentColor, content = content)
+        CompositionLocalProvider(LocalContentColor provides contentColor, content = content)
     }
 }
 

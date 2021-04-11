@@ -19,7 +19,7 @@ package com.example.owl.ui.fakes
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
+import androidx.compose.runtime.CompositionLocalProvider
 import coil.ImageLoader
 import coil.annotation.ExperimentalCoilApi
 import coil.bitmap.BitmapPool
@@ -30,7 +30,7 @@ import coil.request.Disposable
 import coil.request.ImageRequest
 import coil.request.ImageResult
 import coil.request.SuccessResult
-import dev.chrisbanes.accompanist.coil.AmbientImageLoader
+import com.google.accompanist.coil.LocalImageLoader
 
 /**
  * Replaces all remote images with a simple black drawable to make testing faster and hermetic.
@@ -75,7 +75,7 @@ fun ProvideTestImageLoader(content: @Composable () -> Unit) {
             )
         }
 
-        override fun shutdown() { }
+        override fun shutdown() {}
     }
-    Providers(AmbientImageLoader provides loader, content = content)
+    CompositionLocalProvider(LocalImageLoader provides loader, content = content)
 }

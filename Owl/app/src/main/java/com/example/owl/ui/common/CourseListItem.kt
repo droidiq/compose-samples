@@ -21,7 +21,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.preferredSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
@@ -67,6 +67,7 @@ fun CourseListItem(
         Row(modifier = Modifier.clickable(onClick = onClick)) {
             NetworkImage(
                 url = course.thumbUrl,
+                contentDescription = null,
                 modifier = Modifier.aspectRatio(1f)
             )
             Column(
@@ -90,7 +91,8 @@ fun CourseListItem(
                     Icon(
                         imageVector = Icons.Rounded.OndemandVideo,
                         tint = MaterialTheme.colors.primary,
-                        modifier = Modifier.preferredSize(iconSize)
+                        contentDescription = null,
+                        modifier = Modifier.size(iconSize)
                     )
                     Text(
                         text = stringResource(
@@ -107,8 +109,9 @@ fun CourseListItem(
                     )
                     NetworkImage(
                         url = course.instructor,
+                        contentDescription = null,
                         modifier = Modifier
-                            .preferredSize(28.dp)
+                            .size(28.dp)
                             .clip(CircleShape)
                     )
                 }
